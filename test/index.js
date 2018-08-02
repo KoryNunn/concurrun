@@ -114,3 +114,25 @@ test('passes errors correctly', function(t){
         t.notOk(result);
     });
 });
+
+test('dynamic limit', function(t){
+    t.plan(100);
+
+    var state = { count: 0 };
+
+    var limit = concurrencyLimit(function(info, callback){
+        callback(null, Math.max(info.complete, 1));
+    });
+
+    function addTask(count){
+        if(count > 0){
+            limit(asyncTask)(state, function(){
+                t.pass();
+            });
+
+            addTask(count - 1);
+        }
+    }
+
+    addTask(100);
+});

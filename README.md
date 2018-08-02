@@ -8,7 +8,7 @@ https://twitter.com/KoryNunn/status/1024832220467347456
 
 ## Usage
 
-```
+``` javascript
 // Require / setup
 var concurrencyLimit = require('concurrun');
 
@@ -26,4 +26,25 @@ for(var i = 0; i < 100; i++){
     })
 }
 
+```
+
+## Dynamic limit
+
+You can pass a CPS function in place of the limit to dynamically return a limit:
+
+``` javascript
+
+// Ramp up over time
+var limit = concurrencyLimit(function(info, callback){
+    /*
+        info === {
+            inFlight: Number of tasks currently in flight
+            succeeded: Number of tasks that have completed without error
+            complete: Number of tasks that have completed
+        }
+    */
+
+    // Allow N in flight where N is the number of tasks that have previously finished.
+    callback(null, Math.max(info.complete, 1));
+});
 ```
