@@ -1,0 +1,26 @@
+{
+  "name": "concurrency-limit",
+  "version": "1.0.0",
+  "description": "Limit the number of concurrent executions of a CPS function",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tape": "^4.9.1"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KoryNunn/concurrency-limit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KoryNunn/concurrency-limit/issues"
+  },
+  "homepage": "https://github.com/KoryNunn/concurrency-limit#readme"
+}
