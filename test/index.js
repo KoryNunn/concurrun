@@ -19,6 +19,21 @@ function asyncTask(state, result, callback){
     }, 10);
 }
 
+async function asyncPromiseTask(state, result){
+    state.count = state.count || 0;
+    state.count++;
+
+    return new Promise((resolve, reject) => 
+        setTimeout(function(){
+            state.count--;
+            if(result instanceof Error){
+                return reject(result);
+            }
+            resolve(result);
+        }, 10)
+    );
+}
+
 test('1 task 1 at a time', function(t){
     t.plan(1);
 
@@ -26,6 +41,17 @@ test('1 task 1 at a time', function(t){
     var limit = concurrencyLimit(1);
 
     limit(asyncTask)(state, function(){
+        t.pass();
+    });
+});
+
+test('Promises - 1 task 1 at a time', function(t){
+    t.plan(1);
+
+    var state = { count: 0 };
+    var limit = concurrencyLimit(1);
+
+    limit.promise(asyncPromiseTask)(state).then(function(){
         t.pass();
     });
 });
@@ -38,6 +64,21 @@ test('10 tasks 1 at a time', function(t){
 
     for(var i = 0; i < 10; i++){
         limit(asyncTask)(state, function(){
+            t.pass();
+        });
+
+        t.equal(state.count, 1);
+    }
+});
+
+test('Promises - 10 tasks 1 at a time', function(t){
+    t.plan(20);
+
+    var state = { count: 0 };
+    var limit = concurrencyLimit(1);
+
+    for(var i = 0; i < 10; i++){
+        limit.promise(asyncPromiseTask)(state).then(function(){
             t.pass();
         });
 
@@ -103,6 +144,17 @@ test('passes results correctly', function(t){
     });
 });
 
+test('Promises - passes results correctly', function(t){
+    t.plan(1);
+
+    var state = { count: 0 };
+    var limit = concurrencyLimit(1);
+
+    limit.promise(asyncPromiseTask)(state, 'success').then(function(result){
+        t.equal(result, 'success');
+    });
+});
+
 test('passes errors correctly', function(t){
     t.plan(2);
 
@@ -127,6 +179,28 @@ test('dynamic limit', function(t){
     function addTask(count){
         if(count > 0){
             limit(asyncTask)(state, function(){
+                t.pass();
+            });
+
+            addTask(count - 1);
+        }
+    }
+
+    addTask(100);
+});
+
+test('Promises - dynamic limit', function(t){
+    t.plan(100);
+
+    var state = { count: 0 };
+
+    var limit = concurrencyLimit(function(info, callback){
+        callback(null, Math.max(info.complete, 1));
+    });
+
+    function addTask(count){
+        if(count > 0){
+            limit.promise(asyncPromiseTask)(state).then(function(){
                 t.pass();
             });
 

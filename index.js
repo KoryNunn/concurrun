@@ -32,7 +32,7 @@ module.exports = function(rate){
         );
     }
 
-    return function(task){
+    function wrap(task){
         return function(){
             var args = Array.prototype.slice.call(arguments);
             var callback = args.pop();
@@ -56,4 +56,35 @@ module.exports = function(rate){
             runNext();
         };
     };
+
+    wrap.promise = function(task){
+        return function(){
+            var args = Array.prototype.slice.call(arguments);
+            return new Promise((resolve, reject) => {
+                queued.push(function(rateError){
+                    if(rateError){
+                        return reject(rateError);
+                    }
+
+                    task.apply(null, args)
+                        .then(result => {
+                            resolve(result);
+                            inFlight--;
+                            succeeded++;
+                            runNext();
+                        })
+                        .catch(function(error){
+                            callback(error);
+                            inFlight--;
+                            complete++;
+                            runNext();
+                        });
+                });
+
+                runNext();
+            });
+        }
+    };
+
+    return wrap;
 };
