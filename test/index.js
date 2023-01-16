@@ -167,6 +167,17 @@ test('passes errors correctly', function(t){
     });
 });
 
+test('passes errors correctly- promise', function(t){
+    t.plan(1);
+
+    var state = { count: 0 };
+    var limit = concurrencyLimit(1);
+
+    limit.promise(asyncPromiseTask)(state, new Error('fail')).catch(error => {
+        t.equal(error.message, 'fail');
+    });
+});
+
 test('dynamic limit', function(t){
     t.plan(100);
 

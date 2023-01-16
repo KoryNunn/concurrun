@@ -74,7 +74,7 @@ module.exports = function(rate){
                             runNext();
                         })
                         .catch(function(error){
-                            callback(error);
+                            reject(error);
                             inFlight--;
                             complete++;
                             runNext();
